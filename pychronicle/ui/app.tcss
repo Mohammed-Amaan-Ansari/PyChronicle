@@ -1,0 +1,26 @@
+Screen {
+    layout: vertical;
+}
+
+#body {
+    layout: horizontal;
+    height: 1fr;
+}
+
+#code_view {
+    width: 2fr;
+    border: round green;
+    padding: 1;
+}
+
+#details {
+    width: 1fr;
+    border: round blue;
+    padding: 1;
+}
+
+#timeline {
+    height: 5;
+    border: round yellow;
+    padding: 1;
+}
