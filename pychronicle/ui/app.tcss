@@ -24,3 +24,14 @@ Screen {
     border: round yellow;
     padding: 1;
 }
+
+#code_view {
+
+    width: 2fr;
+
+    border: round green;
+
+    padding: 1;
+
+    overflow: auto;
+}
