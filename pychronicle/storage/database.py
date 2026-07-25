@@ -77,7 +77,7 @@ DATABASE = "pychronicle.db"
 
 def get_execution_trace():
 
-    connection = sqlite3.connect(DATABASE)
+    connection = get_connection()
 
     cursor = connection.cursor()
 
@@ -90,6 +90,7 @@ def get_execution_trace():
             function_name,
             locals_snapshot
         FROM execution_trace
+        ORDER BY id
         """
     )
 
