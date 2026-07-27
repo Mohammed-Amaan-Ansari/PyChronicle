@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Container
 from textual.widgets import Header, Footer, Static
 
@@ -16,13 +17,16 @@ class PyChronicleApp(App):
     SUB_TITLE = "Time Travel Debugger"
 
     BINDINGS = [
-        ("n", "next_trace", "Next"),
-        ("p", "previous_trace", "Previous"),
+        Binding("n", "next_trace", "Next"),
+        Binding("p", "previous_trace", "Previous"),
+        Binding("q", "quit_app", "Quit"),
     ]
 
     def compose(self) -> ComposeResult:
 
+        # -----------------------------
         # Load source code
+        # -----------------------------
         sample = (
             Path(__file__).resolve().parents[2]
             / "examples"
@@ -31,12 +35,15 @@ class PyChronicleApp(App):
 
         code = load_source_code(sample)
 
+        # -----------------------------
         # Load execution trace
+        # -----------------------------
         trace = load_trace()
 
         current = trace[0] if trace else None
 
         if current:
+
             details = f"""
 Execution Details
 
@@ -50,13 +57,18 @@ Variables
 
 {current[4]}
 """
+
         else:
+
             details = """
 Execution Details
 
 No execution trace found.
 """
 
+        # -----------------------------
+        # UI
+        # -----------------------------
         yield Header()
 
         with Container(id="body"):
@@ -78,11 +90,21 @@ No execution trace found.
 
         yield Footer()
 
-    def action_next_trace(self):
-        self.notify("Next trace (Coming in Week 3)")
+    # --------------------------------------------------
+    # Actions
+    # --------------------------------------------------
 
-    def action_previous_trace(self):
-        self.notify("Previous trace (Coming in Week 3)")
+    def action_next_trace(self) -> None:
+        """Go to next trace."""
+        self.notify("Next trace (Implemented in Week 3)")
+
+    def action_previous_trace(self) -> None:
+        """Go to previous trace."""
+        self.notify("Previous trace (Implemented in Week 3)")
+
+    def action_quit_app(self) -> None:
+        """Exit application."""
+        self.exit()
 
 
 if __name__ == "__main__":
