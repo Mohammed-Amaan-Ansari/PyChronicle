@@ -11,27 +11,18 @@ Screen {
     width: 2fr;
     border: round green;
     padding: 1;
+    overflow: auto;
 }
 
 #details {
     width: 1fr;
     border: round blue;
     padding: 1;
+    overflow: auto;
 }
 
 #timeline {
-    height: 5;
+    height: 3;
     border: round yellow;
     padding: 1;
-}
-
-#code_view {
-
-    width: 2fr;
-
-    border: round green;
-
-    padding: 1;
-
-    overflow: auto;
 }

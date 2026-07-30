@@ -22,69 +22,109 @@ class PyChronicleApp(App):
         Binding("q", "quit_app", "Quit"),
     ]
 
-    def compose(self) -> ComposeResult:
+    def __init__(self):
+        super().__init__()
 
-        # -----------------------------
-        # Load source code
-        # -----------------------------
-        sample = (
+        self.sample = (
             Path(__file__).resolve().parents[2]
             / "examples"
             / "trace_demo.py"
         )
 
-        code = load_source_code(sample)
+        self.trace_data = load_trace()
+        self.current_index = 0
 
-        # -----------------------------
-        # Load execution trace
-        # -----------------------------
-        trace = load_trace()
+    # --------------------------------------------------
+    # Helper methods
+    # --------------------------------------------------
 
-        current = trace[0] if trace else None
+    def get_current_trace(self):
 
-        if current:
+        if not self.trace_data:
+            return None
 
-            details = f"""
+        return self.trace_data[self.current_index]
+
+    def build_code_view(self, current_line: int | None) -> str:
+
+        with open(self.sample, "r", encoding="utf-8") as file:
+            lines = file.readlines()
+
+        output = []
+
+        for number, line in enumerate(lines, start=1):
+
+            prefix = "▶" if number == current_line else " "
+
+            output.append(
+                f"{prefix} {number:>3} │ {line.rstrip()}"
+            )
+
+        return "\n".join(output)
+
+    def build_details(self) -> str:
+
+        current = self.get_current_trace()
+
+        if not current:
+            return "No execution trace found."
+
+        return f"""
 Execution Details
 
-Event      : {current[1]}
+Trace Index : {self.current_index + 1} / {len(self.trace_data)}
 
-Function   : {current[3]}
-
-Line       : {current[2]}
+Event       : {current[1]}
+Function    : {current[3]}
+Line        : {current[2]}
 
 Variables
 
 {current[4]}
 """
 
-        else:
+    def refresh_ui(self) -> None:
 
-            details = """
-Execution Details
+        current = self.get_current_trace()
 
-No execution trace found.
-"""
+        line_number = current[2] if current else None
 
-        # -----------------------------
-        # UI
-        # -----------------------------
+        code_widget = self.query_one("#code_view", Static)
+        details_widget = self.query_one("#details", Static)
+
+        code_widget.update(
+            self.build_code_view(line_number)
+        )
+
+        details_widget.update(
+            self.build_details()
+        )
+
+    # --------------------------------------------------
+    # UI Composition
+    # --------------------------------------------------
+
+    def compose(self) -> ComposeResult:
+
+        current = self.get_current_trace()
+        line_number = current[2] if current else None
+
         yield Header()
 
         with Container(id="body"):
 
             yield Static(
-                code,
+                self.build_code_view(line_number),
                 id="code_view",
             )
 
             yield Static(
-                details,
+                self.build_details(),
                 id="details",
             )
 
         yield Static(
-            "🕒 Timeline (Coming Soon)",
+            "🕒 Timeline: Use N and P to move through execution history",
             id="timeline",
         )
 
@@ -95,15 +135,18 @@ No execution trace found.
     # --------------------------------------------------
 
     def action_next_trace(self) -> None:
-        """Go to next trace."""
-        self.notify("Next trace (Implemented in Week 3)")
+
+        if self.current_index < len(self.trace_data) - 1:
+            self.current_index += 1
+            self.refresh_ui()
 
     def action_previous_trace(self) -> None:
-        """Go to previous trace."""
-        self.notify("Previous trace (Implemented in Week 3)")
+
+        if self.current_index > 0:
+            self.current_index -= 1
+            self.refresh_ui()
 
     def action_quit_app(self) -> None:
-        """Exit application."""
         self.exit()
 
 
