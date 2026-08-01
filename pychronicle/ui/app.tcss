@@ -22,7 +22,7 @@ Screen {
 }
 
 #timeline {
-    height: 3;
+    height: 5;
     border: round yellow;
     padding: 1;
 }
