@@ -36,7 +36,8 @@ class PyChronicleApp(App):
 
         self.trace_data = load_trace()
         self.current_index = 0
- # --------------------------------------------------
+
+    # --------------------------------------------------
     # Helpers
     # --------------------------------------------------
 
@@ -132,7 +133,7 @@ Variables
             self.build_timeline()
         )
 
-         # --------------------------------------------------
+    # --------------------------------------------------
     # UI
     # --------------------------------------------------
 
@@ -161,3 +162,45 @@ Variables
         )
 
         yield Footer()
+
+    # --------------------------------------------------
+    # Navigation Actions
+    # --------------------------------------------------
+
+    def action_next_trace(self):
+        if self.current_index < len(self.trace_data) - 1:
+            self.current_index += 1
+            self.refresh_ui()
+
+    def action_previous_trace(self):
+        if self.current_index > 0:
+            self.current_index -= 1
+            self.refresh_ui()
+
+    def action_first_trace(self):
+        self.current_index = 0
+        self.refresh_ui()
+
+    def action_last_trace(self):
+        if self.trace_data:
+            self.current_index = len(self.trace_data) - 1
+            self.refresh_ui()
+
+    def action_jump_forward(self):
+        if self.trace_data:
+            self.current_index = min(
+                self.current_index + 5,
+                len(self.trace_data) - 1,
+            )
+            self.refresh_ui()
+
+    def action_jump_backward(self):
+        self.current_index = max(self.current_index - 5, 0)
+        self.refresh_ui()
+
+    def action_quit_app(self):
+        self.exit()
+
+
+if __name__ == "__main__":
+    PyChronicleApp().run()
