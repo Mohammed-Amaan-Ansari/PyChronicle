@@ -131,3 +131,33 @@ Variables
         self.query_one("#timeline", Static).update(
             self.build_timeline()
         )
+
+         # --------------------------------------------------
+    # UI
+    # --------------------------------------------------
+
+    def compose(self) -> ComposeResult:
+
+        current = self.get_current_trace()
+        line_number = current[2] if current else None
+
+        yield Header()
+
+        with Container(id="body"):
+
+            yield Static(
+                self.build_code_view(line_number),
+                id="code_view",
+            )
+
+            yield Static(
+                self.build_details(),
+                id="details",
+            )
+
+        yield Static(
+            self.build_timeline(),
+            id="timeline",
+        )
+
+        yield Footer()
