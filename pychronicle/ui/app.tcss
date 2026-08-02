@@ -14,9 +14,21 @@ Screen {
     overflow: auto;
 }
 
-#details {
+#right_panel {
     width: 1fr;
+    layout: vertical;
+}
+
+#details {
+    height: 1fr;
     border: round blue;
+    padding: 1;
+    overflow: auto;
+}
+
+#watch_view {
+    height: 1fr;
+    border: round magenta;
     padding: 1;
     overflow: auto;
 }
