@@ -14,13 +14,28 @@ WATCH_VARIABLES = [
 def parse_snapshot(snapshot: str) -> dict:
     """
     Convert the stored snapshot string back into a Python dictionary.
+
+    Handles both:
+        {'x': 10}
+    and
+        "{'x': 10}"
     """
 
     if not snapshot:
         return {}
 
     try:
-        return ast.literal_eval(snapshot)
+        data = ast.literal_eval(snapshot)
+
+        # If the result is still a string, evaluate it again
+        if isinstance(data, str):
+            data = ast.literal_eval(data)
+
+        if isinstance(data, dict):
+            return data
+
+        return {}
+
     except Exception:
         return {}
 
