@@ -6,6 +6,7 @@ from textual.containers import Container
 from textual.widgets import Header, Footer, Static
 
 from pychronicle.ui.trace_loader import load_trace
+from pychronicle.ui.watch import build_watch_panel
 
 
 class PyChronicleApp(App):
@@ -48,6 +49,13 @@ class PyChronicleApp(App):
 
         return self.trace_data[self.current_index]
 
+    def get_previous_trace(self):
+
+        if self.current_index == 0:
+            return None
+
+        return self.trace_data[self.current_index - 1]
+
     def build_timeline(self) -> str:
 
         if not self.trace_data:
@@ -57,22 +65,17 @@ class PyChronicleApp(App):
         current = self.current_index + 1
 
         bar_length = 30
-
         position = int((current / total) * bar_length)
 
         timeline = []
 
         for i in range(bar_length):
-
-            if i == position - 1:
-                timeline.append("●")
-            else:
-                timeline.append("─")
+            timeline.append("●" if i == position - 1 else "─")
 
         percentage = int((current / total) * 100)
 
         return (
-            f"🕒 Timeline: {current}/{total}  ({percentage}%)\n"
+            f"🕒 Timeline: {current}/{total} ({percentage}%)\n"
             f"[{''.join(timeline)}]\n"
             f"Controls: N/P | Home/End | F/B | Q"
         )
@@ -88,9 +91,7 @@ class PyChronicleApp(App):
 
             prefix = "▶" if number == current_line else " "
 
-            output.append(
-                f"{prefix} {number:>3} │ {line.rstrip()}"
-            )
+            output.append(f"{prefix} {number:>3} │ {line.rstrip()}")
 
         return "\n".join(output)
 
@@ -109,16 +110,24 @@ Trace Index : {self.current_index + 1} / {len(self.trace_data)}
 Event       : {current[1]}
 Function    : {current[3]}
 Line        : {current[2]}
-
-Variables
-
-{current[4]}
 """
 
-    def refresh_ui(self) -> None:
+    def build_watch_view(self) -> str:
 
         current = self.get_current_trace()
+        previous = self.get_previous_trace()
 
+        current_snapshot = current[4] if current else ""
+        previous_snapshot = previous[4] if previous else ""
+
+        return build_watch_panel(
+            current_snapshot,
+            previous_snapshot,
+        )
+
+    def refresh_ui(self):
+
+        current = self.get_current_trace()
         line_number = current[2] if current else None
 
         self.query_one("#code_view", Static).update(
@@ -127,6 +136,10 @@ Variables
 
         self.query_one("#details", Static).update(
             self.build_details()
+        )
+
+        self.query_one("#watch_view", Static).update(
+            self.build_watch_view()
         )
 
         self.query_one("#timeline", Static).update(
@@ -151,10 +164,17 @@ Variables
                 id="code_view",
             )
 
-            yield Static(
-                self.build_details(),
-                id="details",
-            )
+            with Container(id="right_panel"):
+
+                yield Static(
+                    self.build_details(),
+                    id="details",
+                )
+
+                yield Static(
+                    self.build_watch_view(),
+                    id="watch_view",
+                )
 
         yield Static(
             self.build_timeline(),
@@ -164,7 +184,7 @@ Variables
         yield Footer()
 
     # --------------------------------------------------
-    # Navigation Actions
+    # Actions
     # --------------------------------------------------
 
     def action_next_trace(self):
