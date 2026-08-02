@@ -24,6 +24,7 @@ def parse_snapshot(snapshot: str) -> dict:
     except Exception:
         return {}
 
+
 def build_watch_panel(current_snapshot: str, previous_snapshot: str | None = None) -> str:
     """
     Build the watch variables panel.
