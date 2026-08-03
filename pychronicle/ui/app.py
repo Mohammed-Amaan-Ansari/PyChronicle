@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from pychronicle.delta.reconstructor import StateReconstructor
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container
@@ -28,6 +28,7 @@ class PyChronicleApp(App):
 
     def __init__(self):
         super().__init__()
+        self.reconstructor = StateReconstructor()
 
         self.sample = (
             Path(__file__).resolve().parents[2]
