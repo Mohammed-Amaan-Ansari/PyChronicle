@@ -36,3 +36,10 @@ def trace_function(frame, event, arg):
     insert_execution_trace(trace)
 
     return trace_function
+
+def start_tracing():
+    sys.settrace(trace_function)
+
+
+def stop_tracing():
+    sys.settrace(None)
