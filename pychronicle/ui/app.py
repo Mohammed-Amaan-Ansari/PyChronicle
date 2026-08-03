@@ -1,12 +1,12 @@
 from pathlib import Path
-from pychronicle.delta.reconstructor import StateReconstructor
+
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container
 from textual.widgets import Header, Footer, Static
 
+from pychronicle.delta.reconstructor import StateReconstructor
 from pychronicle.ui.trace_loader import load_trace
-from pychronicle.ui.watch import build_watch_panel
 
 
 class PyChronicleApp(App):
@@ -28,6 +28,7 @@ class PyChronicleApp(App):
 
     def __init__(self):
         super().__init__()
+
         self.reconstructor = StateReconstructor()
 
         self.sample = (
@@ -44,21 +45,18 @@ class PyChronicleApp(App):
     # --------------------------------------------------
 
     def get_current_trace(self):
-
         if not self.trace_data:
             return None
 
         return self.trace_data[self.current_index]
 
     def get_previous_trace(self):
-
         if self.current_index == 0:
             return None
 
         return self.trace_data[self.current_index - 1]
 
     def build_timeline(self) -> str:
-
         if not self.trace_data:
             return "🕒 No trace data available"
 
@@ -82,22 +80,18 @@ class PyChronicleApp(App):
         )
 
     def build_code_view(self, current_line: int | None) -> str:
-
         with open(self.sample, "r", encoding="utf-8") as file:
             lines = file.readlines()
 
         output = []
 
         for number, line in enumerate(lines, start=1):
-
             prefix = "▶" if number == current_line else " "
-
             output.append(f"{prefix} {number:>3} │ {line.rstrip()}")
 
         return "\n".join(output)
 
     def build_details(self) -> str:
-
         current = self.get_current_trace()
 
         if not current:
@@ -114,20 +108,50 @@ Line        : {current[2]}
 """
 
     def build_watch_view(self) -> str:
-
-        current = self.get_current_trace()
-        previous = self.get_previous_trace()
-
-        current_snapshot = current[4] if current else ""
-        previous_snapshot = previous[4] if previous else ""
-
-        return build_watch_panel(
-            current_snapshot,
-            previous_snapshot,
+        current_state = self.reconstructor.reconstruct_until(
+            self.trace_data,
+            self.current_index,
         )
 
-    def refresh_ui(self):
+        previous_state = {}
 
+        if self.current_index > 0:
+            previous_state = self.reconstructor.reconstruct_until(
+                self.trace_data,
+                self.current_index - 1,
+            )
+
+        output = ["Watch Variables\n"]
+
+        watch_variables = [
+            "x",
+            "y",
+            "result",
+            "value",
+            "sum_result",
+            "final_result",
+            "a",
+            "b",
+        ]
+
+        for variable in watch_variables:
+            if variable in current_state:
+                current_value = current_state[variable]
+                previous_value = previous_state.get(variable)
+
+                changed = current_value != previous_value
+                marker = "* " if changed else "  "
+
+                output.append(
+                    f"{marker}{variable} = {current_value}"
+                )
+
+        if len(output) == 1:
+            output.append("No watched variables found.")
+
+        return "\n".join(output)
+
+    def refresh_ui(self):
         current = self.get_current_trace()
         line_number = current[2] if current else None
 
@@ -152,21 +176,18 @@ Line        : {current[2]}
     # --------------------------------------------------
 
     def compose(self) -> ComposeResult:
-
         current = self.get_current_trace()
         line_number = current[2] if current else None
 
         yield Header()
 
         with Container(id="body"):
-
             yield Static(
                 self.build_code_view(line_number),
                 id="code_view",
             )
 
             with Container(id="right_panel"):
-
                 yield Static(
                     self.build_details(),
                     id="details",
