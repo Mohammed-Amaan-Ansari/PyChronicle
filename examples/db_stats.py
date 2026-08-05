@@ -17,3 +17,11 @@ total_size = cursor.fetchone()[0] or 0
 
 cursor.execute("SELECT AVG(LENGTH(locals_snapshot)) FROM execution_trace")
 average_size = cursor.fetchone()[0] or 0
+
+print("PyChronicle Database Statistics")
+print("-" * 40)
+print(f"Total Trace Records : {trace_count}")
+print(f"Total Snapshot Size : {total_size} bytes")
+print(f"Average Delta Size  : {average_size:.2f} bytes")
+
+connection.close()
