@@ -48,3 +48,21 @@ Textual Timeline UI
 | Serialization | pickle |
 | Terminal UI | Textual |
 | Packaging | Poetry / pip |
+
+
+## Installation Process of Pychronicla
+```bash
+pip install -e .
+```
+
+## Run a Script
+
+```bash
+pychronicle run examples/final_demo.py
+```
+
+## Launch the UI
+
+```bash
+pychronicle ui
+```
