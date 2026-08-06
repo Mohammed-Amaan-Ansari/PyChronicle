@@ -44,3 +44,29 @@ def run(script: str):
 
     finally:
         stop_tracing()
+
+
+@app.command()
+def ui():
+    """
+    Launch the PyChronicle Textual UI.
+    """
+
+    typer.echo("🖥️ Launching PyChronicle UI...")
+
+    from pychronicle.ui.app import PyChronicleApp
+
+    PyChronicleApp().run()
+
+
+@app.command()
+def version():
+    """
+    Show the current PyChronicle version.
+    """
+
+    typer.echo("PyChronicle v0.1.0")
+
+
+if __name__ == "__main__":
+    app()
