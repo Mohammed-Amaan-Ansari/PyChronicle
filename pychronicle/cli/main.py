@@ -50,7 +50,7 @@ def run(script: str):
 
 
 @app.command()
-def export(output: str = "trace_report.json"):
+def export(output: str = typer.Argument("trace_report.json")):
     """
     Export the current execution trace to JSON.
     """
