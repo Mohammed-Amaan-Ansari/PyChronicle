@@ -7,7 +7,7 @@ from pychronicle.exporter.json_exporter import export_trace_to_json
 from pychronicle.session.manager import SessionManager
 from pychronicle.storage.schema import initialize_database
 from pychronicle.tracer.runtime_tracer import start_tracing, stop_tracing
-
+from pychronicle.analytics.report import format_statistics_report
 
 app = typer.Typer( help="PyChronicle - AST Powered Time Travel Debugger")
 
@@ -84,6 +84,14 @@ def version():
     """
 
     typer.echo("PyChronicle v0.2.0")
+
+@app.command()
+def stats():
+    """
+    Show execution trace statistics.
+    """
+
+    typer.echo(format_statistics_report())
 
 
 if __name__ == "__main__":
