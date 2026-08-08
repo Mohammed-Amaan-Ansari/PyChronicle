@@ -8,6 +8,7 @@ from pychronicle.session.manager import SessionManager
 from pychronicle.storage.schema import initialize_database
 from pychronicle.tracer.runtime_tracer import start_tracing, stop_tracing
 from pychronicle.analytics.report import format_statistics_report
+from pychronicle.exporter.csv_exporter import export_trace_to_csv
 
 app = typer.Typer( help="PyChronicle - AST Powered Time Travel Debugger")
 
@@ -92,6 +93,16 @@ def stats():
     """
 
     typer.echo(format_statistics_report())
+
+
+@app.command()
+def export_csv(output: str = typer.Argument("trace_report.csv")):
+    """
+    Export execution trace to CSV.
+    """
+
+    output_path = export_trace_to_csv(output)
+    typer.echo(f"📄 CSV exported to: {output_path}")
 
 
 if __name__ == "__main__":
