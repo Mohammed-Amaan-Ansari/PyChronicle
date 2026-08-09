@@ -9,6 +9,12 @@ from pychronicle.storage.schema import initialize_database
 from pychronicle.tracer.runtime_tracer import start_tracing, stop_tracing
 from pychronicle.analytics.report import format_statistics_report
 from pychronicle.exporter.csv_exporter import export_trace_to_csv
+from pychronicle.search.trace_search import (
+    search_by_event,
+    search_by_function,
+    search_by_line,
+    format_trace_results,
+)
 
 app = typer.Typer( help="PyChronicle - AST Powered Time Travel Debugger")
 
@@ -104,6 +110,33 @@ def export_csv(output: str = typer.Argument("trace_report.csv")):
     output_path = export_trace_to_csv(output)
     typer.echo(f"📄 CSV exported to: {output_path}")
 
+
+@app.command()
+def search(
+    function: str | None = typer.Option(None, "--function", help="Filter by function name"),
+    event: str | None = typer.Option(None, "--event", help="Filter by event type"),
+    line: int | None = typer.Option(None, "--line", help="Filter by line number"),
+):
+    """
+    Search execution trace records.
+    """
+
+    if function:
+        results = search_by_function(function)
+        typer.echo(format_trace_results(results))
+        return
+
+    if event:
+        results = search_by_event(event)
+        typer.echo(format_trace_results(results))
+        return
+
+    if line is not None:
+        results = search_by_line(line)
+        typer.echo(format_trace_results(results))
+        return
+
+    typer.echo("Please provide --function, --event, or --line")
 
 if __name__ == "__main__":
     app()
