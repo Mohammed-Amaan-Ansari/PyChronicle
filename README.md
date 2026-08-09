@@ -1,68 +1,130 @@
 # PyChronicle
 
- > **Time-Travel Debugging for Python Applications**
+**AST-Powered Time-Travel Debugger for Python**
 
-PyChronicle is an AST-powered execution tracer that records the state of every variable during program execution. Instead of repeatedly rerunning your application and adding print statements, PyChronicle lets you move backward and forward through execution history to inspect exactly how your program reached its current state.
+PyChronicle is an experimental Python debugging framework that records program execution history using **AST instrumentation**, **runtime tracing**, **delta-compressed state storage**, and an **interactive Textual terminal UI**.
 
-##  Features
+---
 
-- Trace Python program execution line-by-line
-- Record variable state changes (delta tracking)
-- Parse source code using Python AST
-- Lightweight execution tracing with `sys.settrace`
-- Fast in-memory SQLite storage
-- Interactive Terminal UI built with Textual
--  Time-travel through program execution
-- Inspect historical variable values
-- Zero modification required to target programs
+## 🚀 Features
 
+* AST-based instrumentation
+* Runtime execution tracing using `sys.settrace()`
+* SQLite-backed trace persistence
+* Delta-compressed variable storage
+* Full state reconstruction
+* Interactive Textual debugger UI
+* Timeline navigation
+* Watch variables panel
+* JSON and CSV export
+* Trace analytics and statistics
+* Advanced trace search and filtering
+* Session management
+* Interactive replay with breakpoint support
 
-##  Architecture
+---
 
-Python Script
-      │
-      ▼
- AST Parser
-      │
-      ▼
-Execution Tracer
-(sys.settrace)
-      │
-      ▼
-State Recorder
-      │
-      ▼
-SQLite Database
-      │
-      ▼
-Textual Timeline UI
+## 📦 Installation
 
-## Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| Language | Python 3.11+ |
-| Parsing | ast |
-| Execution Tracing | sys.settrace |
-| Database | SQLite |
-| Serialization | pickle |
-| Terminal UI | Textual |
-| Packaging | Poetry / pip |
-
-
-## Installation Process of Pychronicla
 ```bash
+git clone https://github.com/your-username/PyChronicle.git
+cd PyChronicle
 pip install -e .
 ```
 
-## Run a Script
+---
+
+## ▶️ Quick Start
+
+### Run a Script Under Tracing
 
 ```bash
 pychronicle run examples/final_demo.py
 ```
 
-## Launch the UI
+### Launch the Interactive UI
 
 ```bash
 pychronicle ui
 ```
+
+### View Statistics
+
+```bash
+pychronicle stats
+```
+
+### Search Trace Records
+
+```bash
+pychronicle search --function calculate_total
+pychronicle search --event return
+pychronicle search --line 8
+```
+
+### Export Trace
+
+```bash
+pychronicle export trace_report.json
+pychronicle export-csv trace_report.csv
+```
+
+### Replay Execution
+
+```bash
+pychronicle replay --interactive --breakpoint 13
+```
+
+---
+
+## 🏗️ Architecture
+
+```text
+Target Python Script
+        │
+        ▼
+AST Instrumentation
+        │
+        ▼
+Runtime Tracer (sys.settrace)
+        │
+        ▼
+Delta Compressor
+        │
+        ▼
+SQLite Storage
+        │
+        ├── Analytics Engine
+        ├── Search Engine
+        ├── Replay Engine
+        └── Textual UI
+```
+
+---
+
+## 🧠 Technologies Used
+
+* **Python 3.10+**
+* **Textual**
+* **Typer**
+* **SQLite3**
+* **AST module**
+* **sys.settrace**
+
+---
+
+## 📚 Educational Value
+
+PyChronicle demonstrates advanced Python concepts including:
+
+* Abstract Syntax Trees
+* Metaprogramming
+* Runtime introspection
+* Execution tracing
+* Delta compression
+* State reconstruction
+* Terminal UI development
+* CLI application packaging
+
+---
+ 
