@@ -15,7 +15,8 @@ from pychronicle.search.trace_search import (
     search_by_line,
     format_trace_results,
 )
-
+from pychronicle.replay.player import replay_trace
+from pychronicle.session.registry import save_session_record, list_sessions
 app = typer.Typer( help="PyChronicle - AST Powered Time Travel Debugger")
 
 
@@ -33,6 +34,7 @@ def run(script: str):
 
     session = SessionManager()
     info = session.get_session_info()
+    save_session_record(info["session_id"], str(script_path))
 
     typer.echo("🚀 Initializing PyChronicle database...")
     initialize_database()
@@ -137,6 +139,36 @@ def search(
         return
 
     typer.echo("Please provide --function, --event, or --line")
+
+@app.command()
+def replay(
+    from_step: int = typer.Option(1, "--from-step", help="Starting step number"),
+    to_step: int | None = typer.Option(None, "--to-step", help="Ending step number"),
+    delay: float = typer.Option(0.5, "--delay", help="Delay between steps in seconds"),
+):
+    """
+    Replay execution trace step by step.
+    """
+
+    replay_trace(from_step, to_step, delay)
+
+@app.command()
+def sessions():
+    """
+    List saved tracing sessions.
+    """
+
+    session_list = list_sessions()
+
+    if not session_list:
+        typer.echo("No saved sessions found.")
+        return
+
+    typer.echo("Saved Sessions")
+    typer.echo("=" * 30)
+
+    for session_id in session_list:
+        typer.echo(f"• {session_id}")
 
 if __name__ == "__main__":
     app()
