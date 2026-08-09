@@ -145,12 +145,21 @@ def replay(
     from_step: int = typer.Option(1, "--from-step", help="Starting step number"),
     to_step: int | None = typer.Option(None, "--to-step", help="Ending step number"),
     delay: float = typer.Option(0.5, "--delay", help="Delay between steps in seconds"),
+    breakpoint: int | None = typer.Option(None, "--breakpoint", help="Pause when this line number is reached"),
+    interactive: bool = typer.Option(False, "--interactive", help="Enable interactive stepping mode"),
 ):
     """
     Replay execution trace step by step.
+    Supports breakpoints and interactive stepping.
     """
 
-    replay_trace(from_step, to_step, delay)
+    replay_trace(
+        start=from_step,
+        end=to_step,
+        delay=delay,
+        breakpoint_line=breakpoint,
+        interactive=interactive,
+    )
 
 @app.command()
 def sessions():
