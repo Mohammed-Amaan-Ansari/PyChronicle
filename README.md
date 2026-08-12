@@ -27,7 +27,7 @@ PyChronicle is an experimental Python debugging framework that records program e
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/your-username/PyChronicle.git
+Copy the Git Link : git clone https://github.com/your-username/PyChronicle.git
 cd PyChronicle
 pip install -e .
 ```
@@ -72,7 +72,7 @@ pychronicle export-csv trace_report.csv
 ### Replay Execution
 
 ```bash
-pychronicle replay --interactive --breakpoint 13
+x
 ```
 
 ---

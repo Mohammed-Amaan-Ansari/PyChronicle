@@ -6,6 +6,7 @@ from textual.containers import Container
 from textual.widgets import Header, Footer, Static
 
 from pychronicle.delta.reconstructor import StateReconstructor
+from pychronicle.ui.loader import load_source_code
 from pychronicle.ui.trace_loader import load_trace
 
 
@@ -21,8 +22,6 @@ class PyChronicleApp(App):
         Binding("p", "previous_trace", "Previous"),
         Binding("home", "first_trace", "First"),
         Binding("end", "last_trace", "Last"),
-        Binding("f", "jump_forward", "+5"),
-        Binding("b", "jump_backward", "-5"),
         Binding("q", "quit_app", "Quit"),
     ]
 
@@ -34,7 +33,7 @@ class PyChronicleApp(App):
         self.sample = (
             Path(__file__).resolve().parents[2]
             / "examples"
-            / "trace_demo.py"
+            / "final_demo.py"
         )
 
         self.trace_data = load_trace()
@@ -50,35 +49,6 @@ class PyChronicleApp(App):
 
         return self.trace_data[self.current_index]
 
-    def get_previous_trace(self):
-        if self.current_index == 0:
-            return None
-
-        return self.trace_data[self.current_index - 1]
-
-    def build_timeline(self) -> str:
-        if not self.trace_data:
-            return "🕒 No trace data available"
-
-        total = len(self.trace_data)
-        current = self.current_index + 1
-
-        bar_length = 30
-        position = int((current / total) * bar_length)
-
-        timeline = []
-
-        for i in range(bar_length):
-            timeline.append("●" if i == position - 1 else "─")
-
-        percentage = int((current / total) * 100)
-
-        return (
-            f"🕒 Timeline: {current}/{total} ({percentage}%)\n"
-            f"[{''.join(timeline)}]\n"
-            f"Controls: N/P | Home/End | F/B | Q"
-        )
-
     def build_code_view(self, current_line: int | None) -> str:
         with open(self.sample, "r", encoding="utf-8") as file:
             lines = file.readlines()
@@ -87,7 +57,7 @@ class PyChronicleApp(App):
 
         for number, line in enumerate(lines, start=1):
             prefix = "▶" if number == current_line else " "
-            output.append(f"{prefix} {number:>3} │ {line.rstrip()}")
+            output.append(f"{prefix} {number: >3} │ {line.rstrip()}")
 
         return "\n".join(output)
 
@@ -101,7 +71,6 @@ class PyChronicleApp(App):
 Execution Details
 
 Trace Index : {self.current_index + 1} / {len(self.trace_data)}
-
 Event       : {current[1]}
 Function    : {current[3]}
 Line        : {current[2]}
@@ -113,43 +82,65 @@ Line        : {current[2]}
             self.current_index,
         )
 
-        previous_state = {}
-
-        if self.current_index > 0:
-            previous_state = self.reconstructor.reconstruct_until(
-                self.trace_data,
-                self.current_index - 1,
-            )
-
         output = ["Watch Variables\n"]
 
-        watch_variables = [
-            "x",
-            "y",
-            "result",
-            "value",
-            "sum_result",
-            "final_result",
-            "a",
-            "b",
-        ]
+        if not current_state:
+            output.append("No watched variables available.")
+            return "\n".join(output)
 
-        for variable in watch_variables:
-            if variable in current_state:
-                current_value = current_state[variable]
-                previous_value = previous_state.get(variable)
-
-                changed = current_value != previous_value
-                marker = "* " if changed else "  "
-
-                output.append(
-                    f"{marker}{variable} = {current_value}"
-                )
-
-        if len(output) == 1:
-            output.append("No watched variables found.")
+        for key, value in current_state.items():
+            output.append(f"• {key} = {value}")
 
         return "\n".join(output)
+
+    def build_timeline(self) -> str:
+        if not self.trace_data:
+            return "🕒 No trace data available"
+
+        total = len(self.trace_data)
+        current = self.current_index + 1
+
+        return f"🕒 Timeline: {current}/{total} | Controls: N/P | Home/End | Q"
+
+    # --------------------------------------------------
+    # UI
+    # --------------------------------------------------
+
+    def compose(self) -> ComposeResult:
+        current = self.get_current_trace()
+        line_number = current[2] if current else None
+
+        yield Header()
+
+        with Container(id="body"):
+
+            yield Static(
+                self.build_code_view(line_number),
+                id="code_view",
+            )
+
+            with Container(id="right_panel"):
+
+                yield Static(
+                    self.build_details(),
+                    id="details",
+                )
+
+                yield Static(
+                    self.build_watch_view(),
+                    id="watch_view",
+                )
+
+        yield Static(
+            self.build_timeline(),
+            id="timeline",
+        )
+
+        yield Footer()
+
+    # --------------------------------------------------
+    # Refresh
+    # --------------------------------------------------
 
     def refresh_ui(self):
         current = self.get_current_trace()
@@ -170,40 +161,6 @@ Line        : {current[2]}
         self.query_one("#timeline", Static).update(
             self.build_timeline()
         )
-
-    # --------------------------------------------------
-    # UI
-    # --------------------------------------------------
-
-    def compose(self) -> ComposeResult:
-        current = self.get_current_trace()
-        line_number = current[2] if current else None
-
-        yield Header()
-
-        with Container(id="body"):
-            yield Static(
-                self.build_code_view(line_number),
-                id="code_view",
-            )
-
-            with Container(id="right_panel"):
-                yield Static(
-                    self.build_details(),
-                    id="details",
-                )
-
-                yield Static(
-                    self.build_watch_view(),
-                    id="watch_view",
-                )
-
-        yield Static(
-            self.build_timeline(),
-            id="timeline",
-        )
-
-        yield Footer()
 
     # --------------------------------------------------
     # Actions
@@ -227,18 +184,6 @@ Line        : {current[2]}
         if self.trace_data:
             self.current_index = len(self.trace_data) - 1
             self.refresh_ui()
-
-    def action_jump_forward(self):
-        if self.trace_data:
-            self.current_index = min(
-                self.current_index + 5,
-                len(self.trace_data) - 1,
-            )
-            self.refresh_ui()
-
-    def action_jump_backward(self):
-        self.current_index = max(self.current_index - 5, 0)
-        self.refresh_ui()
 
     def action_quit_app(self):
         self.exit()
